@@ -25,24 +25,28 @@ library(beepr)
 # and (2) with an equal area projection
 dir.create("./outputs")
 
-file = "./data/03_clean_df_thin_1.csv" ##enter the name of your table
+file = "./data/04_clean_df_thin_5_hand.csv" ##enter the name of your table
 
 ##minimum occurrence records to run analysis
 n_min <- 15
 
 ## Enter name of folders to read environmental layers
 #Present
-pres_folder = "./Maps/Present"
+pres_folder = "./env_sel/present"
 pres_files <- list.files(pres_folder, full.names = T, 'tif$|bil$') #don't change this
 ##standardize names of the variables as in your model [in the order of appearance in head(pres_files)]
 head(pres_files)
-names_var <- c('bio_15', 'bio_18', 'bio_4', 'bio_5')
+names_var <- c('bio_2', 'bio_3', 'bio_10', 'bio_15', 'bio_18')
 
 ##First RCP (name of the folder where your environmental layers are)
-RCP1 <- "rcp45" ##change number according to RCP
+# RCP1 <- "rcp45" ##change number according to RCP
+# 
+# ##Second RCP
+# RCP2 <- "rcp85"
 
-##Second RCP
-RCP2 <- "rcp85"
+BCC <- "bc_ssp585_41_60" 
+IPSL <- "ip_ssp585_41_60"
+MIROC <-"mic6_ssp585_41_60"
 
 
 ########## END OF ACTION  NEEDED ############
@@ -70,7 +74,7 @@ names(envi) <- names_var
 envi.cut <- crop(envi, c(-160, -28, -60, 90))
 #plot(envi.cut[[1]])
 
-fut_files <- list.files(paste0("./Maps/Future/", RCP1), full.names = T, 'tif$|bil$')
+fut_files <- list.files(paste0("./env_sel/future/", BCC), full.names = T, 'tif$|bil$')
 #head(fut_files)
 envi_fut <- stack(fut_files)
 names(envi_fut) <- names_var ##standardize names of the variables as in your model
@@ -78,12 +82,19 @@ envi_fut_cut <- crop(envi_fut, c(-160, -28, -60, 90))
 #fut_envi_res <- resample(envi_fut, envi.cut, method='bilinear')
 #plot(envi_fut_cut[[1]])
 
-fut_files2 <- list.files(paste0("./Maps/Future/", RCP2), full.names = T, 'tif$|bil$')
+fut_files2 <- list.files(paste0("./env_sel/future/", IPSL), full.names = T, 'tif$|bil$')
 #head(fut_files2)
 envi_fut2 <- stack(fut_files2)
 names(envi_fut2) <- names_var  ##standardize names of the variables as in your model
 
 envi_fut_cut2 <- crop(envi_fut2, c(-160, -28, -60, 90))
+
+fut_files3 <- list.files(paste0("./env_sel/future/", MIROC), full.names = T, 'tif$|bil$')
+#head(fut_files2)
+envi_fut3 <- stack(fut_files3)
+names(envi_fut3) <- names_var  ##standardize names of the variables as in your model
+
+envi_fut_cut3 <- envi_fut3
 
 #length(sp_names) <- 100
 
@@ -211,6 +222,9 @@ future_ly3 <- crop(envi_fut_cut2, polygon_wgs)
 future_ly4 <- mask(future_ly3, polygon_wgs)
 #future_ly2[[3]] <- future_ly2[[3]]/10 #Bio4 tem que ser dividida por 10 ou por 100?
 
+future_ly5 <- crop(envi_fut_cut3, polygon_wgs)
+future_ly6 <- mask(future_ly5, polygon_wgs)
+
 # Plot the results
 #plot(future_ly2[[3]])
 #plot(occurrence_records, add = T)
@@ -242,12 +256,17 @@ dir.create(paste0("./outputs/", sp_names[a], "/Pres_env_crop/"))
 writeRaster(present_ly2, filename=paste0("./outputs/", sp_names[a], "/Pres_env_crop/", names(present_ly2)), bylayer=TRUE, format="GTiff")
 
 dir.create(paste0("./outputs/",sp_names[a], "/Fut_env_crop/"))
-dir.create(paste0("./outputs/",sp_names[a], "/Fut_env_crop/rcp45/"))
+dir.create(paste0("./outputs/",sp_names[a], "/Fut_env_crop/bcc/"))
 #names(future_ly2) <- c(bio_1, bio_2, bio_3, bio_4) ##name the rasters as in your model
-writeRaster(future_ly2, filename=paste0("./outputs/", sp_names[a], "/Fut_env_crop/rcp45/", names(future_ly2)), bylayer=TRUE, format="GTiff")
-dir.create(paste0("./outputs/",sp_names[a], "/Fut_env_crop/rcp85/"))
+writeRaster(future_ly2, filename=paste0("./outputs/", sp_names[a], "/Fut_env_crop/bcc/", names(future_ly2)), bylayer=TRUE, format="GTiff")
+dir.create(paste0("./outputs/",sp_names[a], "/Fut_env_crop/ipsl/"))
 #names(future_ly4) <- c(bio_1, bio_2, bio_3, bio_4) ##name the rasters as in your model
-writeRaster(future_ly4, filename=paste0("./outputs/", sp_names[a], "/Fut_env_crop/rcp85/", names(future_ly4)), bylayer=TRUE, format="GTiff")
+writeRaster(future_ly4, filename=paste0("./outputs/", sp_names[a], "/Fut_env_crop/ipsl/", names(future_ly4)), bylayer=TRUE, format="GTiff")
+
+dir.create(paste0("./outputs/",sp_names[a], "/Fut_env_crop/miroc/"))
+#names(future_ly4) <- c(bio_1, bio_2, bio_3, bio_4) ##name the rasters as in your model
+writeRaster(future_ly6, filename=paste0("./outputs/", sp_names[a], "/Fut_env_crop/miroc/", names(future_ly6)), bylayer=TRUE, format="GTiff")
+
 
 }
 rm(future_ly)

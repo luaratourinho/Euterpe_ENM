@@ -31,7 +31,7 @@ intersect_mask <- function(x){
 # Opening occurences ------------------------------------------------------
 
 ## Entrar com a planilha limpa pós spthin
-file = "./data/03_clean_df_thin_1.csv" ##enter the name of your table
+file = "./data/04_clean_df_thin_5_hand.csv" ##enter the name of your table
 
 ##minimum occurrence records to run analysis
 n_min <- 15
@@ -47,7 +47,7 @@ sp_names <- unique(sp$species)
 
 for (a in 1:length(sp_names)){
 # message("starting the analysis for ", paste0(sp_names[a]))
-sp <- read.table("./data/03_clean_df_thin_1.csv",header=TRUE, sep=",") %>%
+sp <- read.table("./data/04_clean_df_thin_5_hand.csv",header=TRUE, sep=",") %>%
   filter(species == paste0(sp_names[a])) %>%
   select(species, lon, lat)
 
@@ -76,7 +76,7 @@ head(raster_files)
 environment <- stack(raster_files)
 
 ## keep only all cells that are defined for all layers
-environment <- stack(mask(environment, intersect_mask(environment)))
+#environment <- stack(mask(environment, intersect_mask(environment)))
 
 #names(environment) <- c("Bio15","Bio18","Bio4","Bio5") ##nome das biovariáveis na ordem
 
@@ -94,7 +94,7 @@ for (i in 1:length(PA.list)) {
   resp.xy = My_target_species,
   resp.name = "Occurrence",
   PA.nb.rep = 1,
-  PA.nb.absences = 100,
+  PA.nb.absences = length(sp$species)*100,
   PA.strategy = "disk",
   PA.dist.min = PA.list[[i]],
   PA.dist.max = 20000000,
@@ -119,7 +119,7 @@ for (i in 1:length(PA.list)) {
   resp.xy = My_target_species,
   resp.name = "Occurrence",
   PA.nb.rep = 1,
-  PA.nb.absences = length(sp$species)*10, ##Isso tem que entrar no loop
+  PA.nb.absences = length(sp$species), ##Isso tem que entrar no loop
   PA.strategy = "disk",
   PA.dist.min = PA.list[[i]],
   PA.dist.max = 20000000,
@@ -210,9 +210,9 @@ pseudoabs2 <- pa.all.xy2
 #head(pseudoabs2)
 #dim(pseudoabs)
 
-pres = sp
+pres2 = sp
 # Replace using your species name in "Genus_epithet" ##aqui ajeitar para loop
-pres$`species` <- sub(pattern = paste0(sp_names[a]), replacement = "1", x = pres$`species`)
+pres2$`species` <- sub(pattern = paste0(sp_names[a]), replacement = "1", x = pres2$`species`)
 #tail(pres)
 pseudo_0 <- rep(0,length(pseudoabs2))
 pseudoabs2$species <- pseudo_0
@@ -220,7 +220,7 @@ pseudoabs2$species <- pseudo_0
 #pseudoabs2$species <- 0
 pseudoabs2 <- pseudoabs2[,c(3,1,2)]
 names(pseudoabs2) <-c("species","lon","lat")
-pres_pseudo_table2 <- rbind(pres,pseudoabs2)
+pres_pseudo_table2 <- rbind(pres2,pseudoabs2)
 #head(pres_pseudo_table2)
 #tail(pres_pseudo_table)
 #dim(pres_pseudo_table)
