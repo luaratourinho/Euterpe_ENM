@@ -26,7 +26,7 @@ n <-length(sp.names)
 # Building table by a loop ---------------------------------------------------
 
 Results_diff_area <- matrix(nrow = n, ncol = 24)
-colnames(Results_diff_area) <- c("Species", "unchanged_percent_bin","loss_percent_bin", 
+colnames(Results_diff_area) <- c("species", "unchanged_percent_bin","loss_percent_bin", 
                                  "gain_percent_bin", "gain_loss_perc_pixel", 
                                  "unchanged", "loss", "gain", "total_cells",
                                  "mean_diff_fut_cur_percent", "t", "p",
@@ -35,7 +35,7 @@ colnames(Results_diff_area) <- c("Species", "unchanged_percent_bin","loss_percen
                                  "perc_loss_rel_pres", "perc_gain_rel_pres",
                                  "net_value_area", "net_value_perc",
                                  "percentage_change",
-                                 "ocorrencia_area_cu_cu_Eut","ocorrencia_area_fu_cu_Eut")
+                                 "ocorrencia_area_cu_Eut","ocorrencia_area_fu_Eut")
 
 
 for(i in 1:n){
@@ -47,28 +47,72 @@ for(i in 1:n){
   cu_cont <- raster(paste0("./outputs/", sp.names[i], "/results","/CUR.cont_", sp.names[i], ".asc"))
   fu_cont <- raster(paste0("./outputs/", sp.names[i], "/results","/Fut_all.cont_", sp.names[i], ".asc"))
   
- 
-  # Saving only presence area - for Euterpe
-  # cu_pres = cu
-  # cu_pres[cu_pres == 0] <- NA
-  # #cu_pres[!is.na(cu_pres)] <- 1
-  # fu_pres = fu
-  # fu_pres[fu_pres == 0] <- NA
-  # 
-  # 
-  # writeRaster(cu_pres, filename = paste0("./outputs/", sp.names[i], "/results", "/Diff_raster/",
-  #                                          sp.names[i], "_cur_bin.tif"),
-  #             format="GTiff", overwrite=T)
-  # 
-  # writeRaster(fu_pres, filename = paste0("./outputs/", sp.names[i], "/results", "/Diff_raster/",
-  #                                          sp.names[i], "_fut_bin.tif"),
-  #             format="GTiff", overwrite=T)
-  # 
+  
+
+# LUH2 --------------------------------------------------------------------
+
+  #7	Forested Primary Land (primnf)
+  #10	Potentially  Forested Secondary Land (secdf)
+  
+  LUH_2000 <- raster("./env/luh/LULC_2000_CMIP6.1.tif")
+  LUH_2060 <- raster("./env/luh/LULC_2060_SSP5_85_CMIP6.1.tif")
+
+  
+  # Historical
+  
+  LUH_2000_crop <- crop(LUH_2000, cu)
+
+  LUH_2000_crop[LUH_2000_crop == 7] <- 1
+  LUH_2000_crop[LUH_2000_crop == 10] <- 1
+  LUH_2000_crop[LUH_2000_crop == 9] <- 1
+  LUH_2000_crop[LUH_2000_crop != 1] <- 0
+  
+  LUH_2000_resam <- resample(LUH_2000_crop, cu, method="bilinear")
+  LUH_2000_resam[LUH_2000_resam > 0.5] <- 1
+  LUH_2000_resam[LUH_2000_resam != 1] <- 0
+  
+  LUH_2000_mask <- mask(LUH_2000_resam, cu)
+  
+  LUH_2000_clim <- LUH_2000_mask*cu
+  
+  target_dir = paste(paste0("./outputs/", sp.names[i], "/LUH/", sep=""))
+  
+  if (file.exists(target_dir)) {
+    cat("The directory already exists")
+  } else {
+    dir.create(target_dir)
+  }
+  
+  writeRaster(LUH_2000_clim, filename = paste0("./outputs/", sp.names[i], "/LUH/",
+                                           sp.names[i], "_LUH_2000_clim.tif"),
+              format="GTiff", overwrite=T)
+  
+  
+  # Future
+  
+  LUH_2060_crop <- crop(LUH_2060, fu)
+  
+  LUH_2060_crop[LUH_2060_crop == 7] <- 1
+  LUH_2060_crop[LUH_2060_crop == 10] <- 1
+  LUH_2060_crop[LUH_2060_crop != 1] <- 0
+  
+  LUH_2060_resam <- resample(LUH_2060_crop, fu, method="bilinear")
+  LUH_2060_resam[LUH_2060_resam > 0.5] <- 1
+  LUH_2060_resam[LUH_2060_resam != 1] <- 0
+  
+  LUH_2060_mask <- mask(LUH_2060_resam, fu)
+  
+  LUH_2060_clim <- LUH_2060_mask*cu
+  
+  writeRaster(LUH_2060_clim, filename = paste0("./outputs/", sp.names[i], "/LUH/",
+                                               sp.names[i], "_LUH_2060_clim.tif"),
+              format="GTiff", overwrite=T)
+  
   
   
   #BINARY
   
-  cu2 = cu
+  cu2 = LUH_2000_clim
   cu2[cu2 == 1] <- 2
   # fut-pres
   # 1-2 = -1 -> Here should be 1-1 = 0, i.e., the two have not changed, STABLE
@@ -76,10 +120,10 @@ for(i in 1:n){
   # 0-2 = -2 ->  Here should be 0-1 = -1, i.e., LOSS
   # 0-0 = 0 -> inadequate area in both scenarios, so the next step we turn into NA
   
-  diff_bin <- fu - cu2
+  diff_bin <- LUH_2060_clim - cu2
   diff_bin[diff_bin == 0] <- NA
- 
-   
+  
+  
   
   # Values and percentage related to the number of pixels
   
@@ -101,26 +145,20 @@ for(i in 1:n){
   diff_bin2[diff_bin2 == -1] <- 0
   diff_bin2[diff_bin2 == -2] <- -1
   
-  target_dir = paste(paste0("./outputs/", sp.names[i], "/results", "/Diff_raster/", sep=""))
-  #dir.create(target_dir)
   
-  if (file.exists(target_dir)) {
-    cat("The directory already exists")
-  } else {
-    dir.create(target_dir)
-  }
-  
-  
-  writeRaster(diff_bin2, filename = paste0("./outputs/", sp.names[i], "/results", "/Diff_raster/",
+  writeRaster(diff_bin2, filename = paste0("./outputs/", sp.names[i], "/LUH/",
                                            sp.names[i], "_diff_bin.tif"),
               format="GTiff", overwrite=T)
   
-
+  
   
   # CONTINUOUS
   
   # Evaluating the difference between future and current continuous projections
   # Mean of difference - Negative value means loss, positive value means gain
+  
+  cu_cont <- cu_cont*LUH_2000_mask
+  fu_cont <- fu_cont*LUH_2060_mask
   
   testt <- t.test(fu_cont[], cu_cont[], paired=T)
   chars <- capture.output(print(testt))
@@ -132,7 +170,7 @@ for(i in 1:n){
   p <- testt$p.value
   
   diff_cont <- fu_cont - cu_cont
-  writeRaster(diff_cont, filename = paste0("./outputs/", sp.names[i], "/results", "/Diff_raster/", 
+  writeRaster(diff_cont, filename = paste0("./outputs/", sp.names[i], "/LUH/", 
                                            sp.names[i], "_diff_cont.tif"),
               format="GTiff", overwrite=T)
   
@@ -145,7 +183,7 @@ for(i in 1:n){
   # Values and percentage related to the area in km2
   
   #current
-  cu_area = cu
+  cu_area = LUH_2000_clim
   cu_area[cu_area == 0] <- NA
   r = raster(nrow = cu_area@nrows, ncol = cu_area@ncols, xmn = cu_area@extent@xmin, 
              xmx = cu_area@extent@xmax, ymn = cu_area@extent@ymin, ymx = cu_area@extent@ymax) 
@@ -156,7 +194,7 @@ for(i in 1:n){
   ocorrencia_area_cu <- cellStats(ocorrencia_area, stat='sum', na.rm=TRUE, asSample=TRUE)
   
   #future
-  fu_area = fu 
+  fu_area = LUH_2060_clim 
   fu_area[fu_area == 0] <- NA
   ocorrencia_area2 = x * fu_area
   ocorrencia_area_fu <- cellStats(ocorrencia_area2, stat='sum', na.rm=TRUE, asSample=TRUE)
@@ -210,26 +248,28 @@ for(i in 1:n){
   
   cu_eut <- raster(paste0("./outputs/", "Euterpe_edulis", "/results", "/Diff_raster/", "Euterpe_edulis_cur_bin.tif"))
   fu_eut <- raster(paste0("./outputs/", "Euterpe_edulis", "/results","/Diff_raster/", "Euterpe_edulis_fut_bin.tif"))
-  cu <- raster(paste0("./outputs/", sp.names[i], "/results", "/CUR.bin_", sp.names[i], ".asc"))
-  fu <- raster(paste0("./outputs/", sp.names[i], "/results","/Fut_all.bin_", sp.names[i], ".asc"))
+  cu <- LUH_2000_clim
+  fu <- LUH_2060_clim
   
   
   # You should rebuid the r2 to match r1
   
   cu_crop <- resample(cu, cu_eut, method='bilinear')
   cu_crop <- mask(cu_crop, cu_eut)
+  cu_crop[cu_crop > 0.5] <- 1
   cu_crop[cu_crop == 0] <- NA
   
   fu_crop <- resample(fu, fu_eut, method='bilinear')
   fu_crop <- mask(fu_crop, fu_eut)
+  fu_crop[fu_crop > 0.5] <- 1
   fu_crop[fu_crop == 0] <- NA
   
-  writeRaster(cu_crop, filename = paste0("./outputs/", sp.names[i], "/results", "/Diff_raster/", 
-                                           sp.names[i], "_cu_by_Eut.tif"),
+  writeRaster(cu_crop, filename = paste0("./outputs/", sp.names[i], "/LUH/", 
+                                         sp.names[i], "_cu_by_Eut.tif"),
               format="GTiff", overwrite=T)
   
-  writeRaster(fu_crop, filename = paste0("./outputs/", sp.names[i], "/results", "/Diff_raster/", 
-                                           sp.names[i], "_fu_by_Eut.tif"),
+  writeRaster(fu_crop, filename = paste0("./outputs/", sp.names[i], "/LUH/", 
+                                         sp.names[i], "_fu_by_Eut.tif"),
               format="GTiff", overwrite=T)
   
   #current
@@ -248,7 +288,7 @@ for(i in 1:n){
   fu_crop_area[fu_crop_area == 0] <- NA
   ocorrencia_area2 = x * fu_crop_area
   ocorrencia_area_fu_Eut <- cellStats(ocorrencia_area2, stat='sum', na.rm=TRUE, asSample=TRUE)
-
+  
   
   Results_diff_area[i, ] <- c(sp.names[i], unchanged_percent_bin, loss_percent_bin,
                               gain_percent_bin, gain_loss_perc_pixel, 
@@ -262,5 +302,5 @@ for(i in 1:n){
   
 }
 
-write.csv(Results_diff_area, paste0("./outputs/", "8_calculating_area.csv"), row.names = F)
+write.csv(Results_diff_area, paste0("./outputs/", "13_calculating_area.csv"), row.names = F)
 

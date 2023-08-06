@@ -1,9 +1,8 @@
 # Credits -----------------------------------------------------------------
 
 # Code created by Luara Tourinho (https://github.com/luaratourinho)
-# Edited by
-# Julia Niemeyer
-# Date: 08 august 2021
+# Edited by Julia Niemeyer
+# Last update: 08 august 2021
 
 
 # First install packages
@@ -269,11 +268,5 @@ writeRaster(future_ly6, filename=paste0("./outputs/", sp_names[a], "/Fut_env_cro
 
 
 }
-rm(future_ly)
-rm(future_ly2)
-rm(future_ly3)
-rm(future_ly4)
-rm(present_ly)
-rm(present_ly2)
 
 #beep(5) ##R will play a tune when this analysis is done

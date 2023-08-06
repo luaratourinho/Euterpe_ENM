@@ -35,7 +35,7 @@ colnames(Results_diff_area) <- c("Species", "unchanged_percent_bin","loss_percen
                                  "perc_loss_rel_pres", "perc_gain_rel_pres",
                                  "net_value_area", "net_value_perc",
                                  "percentage_change",
-                                 "ocorrencia_area_cu_cu_Eut","ocorrencia_area_fu_cu_Eut")
+                                 "ocorrencia_area_cu_Eut","ocorrencia_area_fu_Eut")
 
 
 for(i in 1:n){

@@ -192,7 +192,7 @@ pres = sp
 # Replace using your species name in "Genus_epithet" ##aqui ajeitar para loop
 pres$`species` <- sub(pattern = paste0(sp_names[a]), replacement = "1", x = pres$`species`)
 #tail(pres)
-pseudo_0 <- rep(0,length(pseudoabs))
+pseudo_0 <- rep(0,nrow(pseudoabs))
 #pseudoabs$species <- NA
 #pseudoabs$species <- 0
 pseudoabs$species <- pseudo_0
@@ -214,7 +214,7 @@ pres2 = sp
 # Replace using your species name in "Genus_epithet" ##aqui ajeitar para loop
 pres2$`species` <- sub(pattern = paste0(sp_names[a]), replacement = "1", x = pres2$`species`)
 #tail(pres)
-pseudo_0 <- rep(0,length(pseudoabs2))
+pseudo_0 <- rep(0,nrow(pseudoabs2))
 pseudoabs2$species <- pseudo_0
 #pseudoabs2$species <- NA
 #pseudoabs2$species <- 0

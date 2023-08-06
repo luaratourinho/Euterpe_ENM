@@ -25,7 +25,8 @@ library(corrplot)
 present_list <- list.files("data/env_cropped/", pattern = "tif$", full.names = T)
 
 # object with present variables
-present_ras <- stack(present_list)
+#present_ras <- stack(present_list)
+present_ras <- envi.mask2
 
 # id from cells without NA
 mi <- Which(present_ras[[1]], cells = TRUE)
@@ -51,13 +52,13 @@ pres_vars_sel
 # selecting variables with lower correlation (<0.6)
 pres_vars_sel_names <- names(present_ras)[!names(present_ras) %in% exclude_vars]
 pres_vars_sel_names
-# for 0.6 [1] "X_wc2.1_2.5m_bio_15" "X_wc2.1_2.5m_bio_2"  "X_wc2.1_2.5m_bio_8"
-# for 0.7 [1] "X_wc2.1_2.5m_bio_15" "X_wc2.1_2.5m_bio_18" "X_wc2.1_2.5m_bio_2"  "X_wc2.1_2.5m_bio_8" 
+# for 0.6 [1] "wc2.1_2.5m_bio_10" "wc2.1_2.5m_bio_15" "wc2.1_2.5m_bio_18" "wc2.1_2.5m_bio_3" 
+# for 0.7 [1] "wc2.1_2.5m_bio_10" "wc2.1_2.5m_bio_15" "wc2.1_2.5m_bio_18" "wc2.1_2.5m_bio_2"  "wc2.1_2.5m_bio_3" 
 
 
 # An alternative using pearson -------------------------------------------------
 
-exclude_vars2 <- caret::findCorrelation(cor(vals, method = 'pearson'), cutoff = 0.6, names = TRUE)
+exclude_vars2 <- caret::findCorrelation(cor(vals, method = 'pearson'), cutoff = 0.7, names = TRUE)
 all_table2 <- as.data.frame(cor(vals, method = 'pearson'))
 
 pres_vars_sel2 <- present_ras[[which(!names(present_ras) %in% exclude_vars2)]]
@@ -65,9 +66,10 @@ pres_vars_sel2
 
 pres_vars_sel_names2 <- names(present_ras)[!names(present_ras) %in% exclude_vars2]
 pres_vars_sel_names2
-# for 0.6 [1] "X_wc2.1_2.5m_bio_14" "X_wc2.1_2.5m_bio_15" "X_wc2.1_2.5m_bio_2"  "X_wc2.1_2.5m_bio_5" 
-# for 0.7 [1] "X_wc2.1_2.5m_bio_14" "X_wc2.1_2.5m_bio_15" "X_wc2.1_2.5m_bio_18" 
-#"X_wc2.1_2.5m_bio_19" "X_wc2.1_2.5m_bio_2"  "X_wc2.1_2.5m_bio_5"
+# for 0.6 [1] "wc2.1_2.5m_bio_10" "wc2.1_2.5m_bio_15" "wc2.1_2.5m_bio_18" "wc2.1_2.5m_bio_19" "wc2.1_2.5m_bio_2" 
+# for 0.7 [1] "wc2.1_2.5m_bio_14" "wc2.1_2.5m_bio_15" "wc2.1_2.5m_bio_18" "wc2.1_2.5m_bio_19" "wc2.1_2.5m_bio_2" 
+#"wc2.1_2.5m_bio_5"  "wc2.1_2.5m_bio_8"  "wc2.1_2.5m_bio_9" 
+
 
 write.csv(all_table, "./outputs/6_variables_correlation_spearman.csv")
 write.csv(all_table2, "./outputs/6_variables_correlation_pearson.csv")
@@ -79,7 +81,7 @@ write.csv(all_table2, "./outputs/6_variables_correlation_pearson.csv")
 
 # Copy selected variables in a new directory
 # creating directory
-dir.create(paste0("./data/env_sel/", "."))
+dir.create(paste0("./env_sel/", "."))
 # Add the chosen variables there
 
 

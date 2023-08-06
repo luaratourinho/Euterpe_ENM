@@ -1,0 +1,10 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+data
+env_sel
+outputs
+Richness
+study_data
+*.Rproj
