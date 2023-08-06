@@ -73,7 +73,7 @@ occ_download(
 # https://doi.org/10.15468/dl.6karx3
 gbif_df <- fread("./data/0120643-210914110416597.csv", na.strings = c("", NA))
 
-# Chose the colunms of your interest
+# Choose the colunms of your interest
 gbif_df2 <- gbif_df[,c("family","species","decimalLongitude","decimalLatitude",
                        "year","countryCode")]
 head(gbif_df2)
