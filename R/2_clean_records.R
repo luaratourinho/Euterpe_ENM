@@ -23,7 +23,7 @@ library(countrycode)
 
 
 
-# reading data
+# reading data with species occurrences
 
 searches_df  <- read_csv("./data/1_myoccs_gbif.csv")
 
@@ -32,7 +32,6 @@ splist <- read.csv("./data/1_myoccs_gbif.csv",
   pull(species)
 
 splist <- unique(splist)
-
 
 
 # removing records with NA coordinates, keeping only species from our list
@@ -48,14 +47,11 @@ ggplot()+ coord_fixed()+
              colour = "yellow", size = 0.5)+
   theme_bw()
 
-# standardizing country names
-# searches_occs$countrycode <- countrycode(searches_occs$country, origin = 'iso2c', destination = 'iso3c')
-# searches_occs$countrycode <- ifelse(is.na(searches_occs$countrycode), 
-#                                     "BRA", searches_occs$countrycode)
-
-# NA <- 0
 searches_occs$lon <- ifelse(is.na(searches_occs$lon), 
                             0, searches_occs$lon)
+
+
+# finding outliers data (flagged records - e.g., at the sea, city centroid, capital... if you know that the target species do not occur there)
 
 flags_occs <- clean_coordinates(
   x = searches_occs,
@@ -92,13 +88,15 @@ searches_occs_clean1 <- searches_occs[flags_occs$.summary, ] %>%
 
 
 # Cleaning by worldclim files ------------------------------------------------
+# use one of the raster that refer to the bioclimatic variable. It is just to make sure that any coordinate is out of the raster
 
 library(raster)
 
 searches_occs_clean2 = searches_occs_clean1
 
-variable_world <- raster("D:/Luara Tourinho/OneDrive/Documentos/Environmental_data/Worldclim/wc2.1_2.5m_bio/wc2.1_2.5m_bio_1.tif")
-# All Americas
+variable_world <- raster("./Environmental_data/Worldclim/wc2.1_2.5m_bio/wc2.1_2.5m_bio_1.tif")
+
+# All Americas - if you want only the coordinates from Americas, for example
 variable <- crop(variable_world, c(-130, -25, -50, 50))
 coordinates(searches_occs_clean2) <- ~lon+lat
 proj4string(searches_occs_clean2)=CRS("+proj=longlat +datum=WGS84")
@@ -117,85 +115,32 @@ which(is.na(searches_prjext$searches_extract))
 search_occ_extracted <- searches_prjext[!is.na(searches_prjext$searches_extract),]
 head(search_occ_extracted)
 
+# keep only the columns of your interest
 search_occ_extracted <- search_occ_extracted[,c("family", "species", "lon", 
                                                 "lat", "year", "country")]
+
+# check the data
 head(search_occ_extracted)
 dim(search_occ_extracted)
 
 
 
-# Cleaning non-endemic species (example) ----------------------------------
+# Cleaning old date -------------------------------------------------------
 
-
-# which species have records in other continent outside Americas? (lon < -20)
-
-# clean_df = search_occ_extracted
-# 
-# western_species <- clean_df %>%
-#   mutate(western = lon <= -20) %>%
-#   filter(western == TRUE) %>%
-#   #group_by(species, western) %>%
-#   #summarize(n_records = n()) %>%
-#   pull(species) %>%
-#   unique() %>%
-#   tibble() %>%
-#   rename("westernmost_species" = ".") %>%
-#   arrange(westernmost_species)
-# 
-# 
-# # removing these species from clean_df
-# `%notin%` <- Negate(`%in%`)
-# 
-# clean_df <- clean_df %>%
-#   filter(species %notin% as.character(western_species$westernmost_species))
-# 
-# 
-# # plotting clean records # All Americas
-# ggplot() +
-#   borders("world", colour="gray50", fill="gray50") +
-#   geom_point(data = clean_df, aes(x = lon, y = lat),
-#              colour = "blue", size = 0.5) +
-#   coord_sf(xlim = c(-160, -28), ylim = c(-60,90)) +
-#   theme_bw()
-# 
-# # or with more details
-# 
-# g <- ggplot() +
-#   borders("world", colour="gray80", fill="gray80") +
-#   geom_point(data = clean_df, aes(x = lon, y = lat, col = species),
-#              colour = '#7570b3', size = 1.5) +
-#   coord_sf(xlim = c(-85, -30), ylim = c(-35,-5)) +
-#   theme_classic() +
-#   xlab("") +
-#   ylab("") +
-#   theme(
-#     strip.text = element_text(face = "italic"),
-#     legend.text = element_text(face = "italic"),
-#     legend.position = "none")
-# theme_bw()
-# g1 <- g + facet_wrap(species ~ ., ncol = 5)
-# g1
-# 
-# ggsave(g1, file = "./Figure_occurrences2.tiff",height = 15, 
-#        width = 22, units = "cm")
-
-
-
-# # Cleaning old date -------------------------------------------------------
-# 
-# search_occ_by_date <- search_occ_extracted %>%
-#   filter(year >= 1950)
+search_occ_by_date <- search_occ_extracted %>%
+  filter(year >= 1950)
 
 # Number of records -------------------------------------------------------
 
-# n_records <- count(search_occ_by_date, species)
+n_records <- count(search_occ_by_date, species)
 n_records_before <- count(search_occ_extracted, species)
 
 # Writing outputs ---------------------------------------------------------
+# I created the 'output' directory just to save the outputs from the whole ENM, but you can save in anywhere
 
-# write_csv(n_records, path = "./outputs/02_n_records.csv")
-# write_csv(search_occ_by_date, path = "./outputs/02_clean_occ.csv")
+write_csv(n_records, path = "./outputs/02_n_records.csv")
+write_csv(search_occ_by_date, path = "./outputs/02_clean_occ.csv")
+#write_csv(n_records_before, path = "./data/02_n_records.csv")
+#write_csv(search_occ_extracted, path = "./data/02_clean_occs.csv")
 
-write_csv(n_records_before, path = "./data/02_n_records.csv")
-write_csv(search_occ_extracted, path = "./data/02_clean_occs.csv")
-
+# END

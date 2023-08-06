@@ -68,7 +68,7 @@ ens.maps = T # save ensemble maps by algorithm
 
 #### Name of .csv file with species occurrences, columns: 'species', 'lon', 'lat'
 ## Entrar com a planilha limpa pós spthin
-file = "./data/04_clean_df_thin_5_hand.csv"
+file = "./outputs/03_clean_df_thin_5.csv"
 
 ##minimum occurrence records to run analysis
 n_min <- 15

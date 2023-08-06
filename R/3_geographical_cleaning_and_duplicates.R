@@ -27,24 +27,20 @@ library(data.table)
 
 # # loading clean occs and getting clean species list
 
-clean_df <- read.csv("./02_clean_occs.csv",
+clean_df <- read.csv("./outputs/02_clean_occ.csv",
                      stringsAsFactors = FALSE)
 
-clean_df <- clean_df[,2:4]
+clean_df <- clean_df[,2:4] #here I am selecting only the columns 'species', 'lon', 'lat'
 
-spp <- read.csv("./02_clean_occs.csv",
+spp <- read.csv("./outputs/02_clean_occ.csv",
                            stringsAsFactors = FALSE) %>%
   pull(species)
 
 spp <- unique(spp)
 
 
-# Removing duplicates
-
-
-
 # Example of two distances in km
-# Run to two distances you are interested in, then choose one option to proceed
+# Run to two distances you are interested in, then choose one option to proceed. I chose 5 km.
 
 # thinning records by 5 km
 thin_5 <- list()
@@ -110,7 +106,7 @@ n_5 <- clean_df_thin_5 %>%
 
 
 # adding counts to the n_records table
-n_records <- read_csv("./02_n_records.csv")
+n_records <- read_csv("./outputs/02_n_records.csv")
 
 n_records <- n_records %>%
   left_join(n_5, by = "species") %>%
@@ -119,6 +115,6 @@ n_records <- n_records %>%
   replace_na(list(n_thin_5 = 0))
 
 # writing outputs
-write_csv(n_records, path = "./03_n_thinned_records.csv")
-write_csv(clean_df_thin_5, path = "./03_clean_df_thin_5.csv")
+write_csv(n_records, path = "./outputs/03_n_thinned_records.csv")
+write_csv(clean_df_thin_5, path = "./outputs/03_clean_df_thin_5.csv")
 #write_csv(clean_df_thin_10, path = "./outputs/03_clean_df_thin_10.csv")

@@ -31,7 +31,7 @@ intersect_mask <- function(x){
 # Opening occurences ------------------------------------------------------
 
 ## Entrar com a planilha limpa pós spthin
-file = "./data/04_clean_df_thin_5_hand.csv" ##enter the name of your table
+file = "./outputs/03_clean_df_thin_5.csv" ##enter the name of your table
 
 ##minimum occurrence records to run analysis
 n_min <- 15

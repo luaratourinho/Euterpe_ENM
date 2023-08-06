@@ -16,7 +16,7 @@ library(rgdal)
 library(rgeos)
 
 # Read your species list
-sp.names <- read.csv("./data/04_clean_df_thin_5_hand.csv", head=T)
+sp.names <- read.csv("./outputs/03_clean_df_thin_5.csv", head=T)
 sp.names <- unique(sp.names$species)
 sp.names <- sp.names[-18]
 n <-length(sp.names)

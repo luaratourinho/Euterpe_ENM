@@ -24,7 +24,8 @@ library(beepr)
 # and (2) with an equal area projection
 dir.create("./outputs")
 
-file = "./data/04_clean_df_thin_5_hand.csv" ##enter the name of your table
+#file = "./data/04_clean_df_thin_5_hand.csv" ##enter the name of your table
+file = "./outputs/03_clean_df_thin_5.csv"
 
 ##minimum occurrence records to run analysis
 n_min <- 15

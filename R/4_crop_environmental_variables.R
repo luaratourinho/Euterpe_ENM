@@ -18,13 +18,16 @@ library(rgeos)
 library(reshape)
 
 
+# Download climatic data from any database of your interest
+# I chose worldclim - https://www.worldclim.org/
+
 
 ## Current variables ------------------------------------------------------
 
 
 # Reading rasters
 # use pattern = '.tif$' or something else if you have multiple files in this folder
-raster_files <- list.files("D:/Luara Tourinho/OneDrive/Documentos/Environmental_data/Worldclim/wc2.1_2.5m_bio", 
+raster_files <- list.files("./Environmental_data/Worldclim/wc2.1_2.5m_bio", 
                            full.names = T, 'tif$|bil$')
 head(raster_files)
 
@@ -32,10 +35,11 @@ envi <- stack(raster_files)
 
 # Cropping rasters
 
-# Choose your extention
+# Choose your extension
 # All America
-envi.cut<-crop(envi, c(-130, -25, -50, 50))
-plot(envi.cut[[1]])
+envi.cut<-crop(envi, c(-130, -25, -50, 50)) # my species occur in America, I cropped here only to reduce the size of the raster, reducing the analysis process later.. 
+plot(envi.cut[[1]]) # check it
+
 
 # Projections
 
@@ -46,8 +50,8 @@ crs.albers <- CRS("+proj=aea +lat_1=-5 +lat_2=-42 +lat_0=-32 +lon_0=-60 +x_0=0
                   +y_0=0 +ellps=aust_SA +units=m +no_defs") 
 
 
-# Creating mask area for variables' correlation
-species_df <- read.csv("./data/04_clean_df_thin_5_hand.csv")        
+# Creating mask area for variables' correlation, which includes all coordinates
+species_df <- read.csv("./outputs/03_clean_df_thin_5.csv")        
 coords <- species_df[ ,2:3]
 coordinates(coords) <- c("lon", "lat")
 proj4string(coords) <- crs.wgs84  # define original projection - wgs84
@@ -56,11 +60,13 @@ mcp <- gConvexHull(coords) # create minimum convex polygon
 # If you want to add a buffer with a distance or an area around the mpc
 # Attention: gBuffer and gArea are in meters, you have to convert in km if you want to
 mcp_buffer <- gBuffer(mcp, width = gArea(mcp)*1e-07) # 20% bigger than mcp
-# mcp_buffer <- SpatialPolygonsDataFrame(mcp_buffer, data = data.frame("val" = 1, row.names = "buffer"))
-#mcp_buffer <- spTransform(mcp_buffer, crs.wgs84)
+mcp_buffer <- SpatialPolygonsDataFrame(mcp_buffer, data = data.frame("val" = 1, row.names = "buffer"))
+mcp_buffer <- spTransform(mcp_buffer, crs.wgs84)
+
+# OR if you prefer to you 'sf' package
 
 library("sf")
-#tdwg4.laea = sf::read_sf("level4.shp")  # assumes in project root
+
 mcp_buffer = sf::st_as_sf(mcp_buffer)
 mcp_buffer = sf::st_transform(mcp_buffer, CRS("+proj=longlat +datum=WGS84 +no_defs"))
 
@@ -109,6 +115,6 @@ writeRaster(envi_fut.mask, filename='./data/env_cropped/future/', format="GTiff"
 
 
 # If you are going to select variables from Pearson/Spearman correlation
-# Before crop all rasters from future scenarios, 6_variable_correlation_spearman_and_pearson.R
+# Before crop all rasters from future scenarios, 5_variable_correlation_spearman_and_pearson.R
 # Then come back and crop the selected variables
 

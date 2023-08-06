@@ -20,8 +20,7 @@ library(dplyr)
 library(corrplot)
 
 
-
-# list of files of present variables
+# list of files of present/current variables
 present_list <- list.files("data/env_cropped/", pattern = "tif$", full.names = T)
 
 # object with present variables
@@ -70,7 +69,7 @@ pres_vars_sel_names2
 # for 0.7 [1] "wc2.1_2.5m_bio_14" "wc2.1_2.5m_bio_15" "wc2.1_2.5m_bio_18" "wc2.1_2.5m_bio_19" "wc2.1_2.5m_bio_2" 
 #"wc2.1_2.5m_bio_5"  "wc2.1_2.5m_bio_8"  "wc2.1_2.5m_bio_9" 
 
-
+# Save the table with the results only to check
 write.csv(all_table, "./outputs/6_variables_correlation_spearman.csv")
 write.csv(all_table2, "./outputs/6_variables_correlation_pearson.csv")
 
