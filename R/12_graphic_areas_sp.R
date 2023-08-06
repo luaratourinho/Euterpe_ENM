@@ -130,5 +130,4 @@ ggsave(
   file = "./Figures/Species_area_dist.tiff",
   height = 20,
   width = 15,
-  units = "cm"
-)
+  units = "cm")

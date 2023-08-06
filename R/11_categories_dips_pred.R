@@ -319,5 +319,4 @@ ggsave(
   file = "./Figures/Categories.tiff",
   height = 10,
   width = 20,
-  units = "cm"
-)
+  units = "cm")

@@ -16,6 +16,7 @@ library(raster)
 
 # Reading file with species names
 
+# table which indicates the ecosystem function of the species: 'species', 'dispersers', 'predator'
 sp.names <- read_csv("./data/eco_relationship.csv")
 
 # Dispensers

@@ -1,8 +1,8 @@
 
 
 sp.names <- read_csv("./data/eco_relationship.csv")
-records <- read.csv("./data/04_clean_df_thin_5_hand.csv", head=T)
-family <- read.csv("./data/02_clean_occs.csv", head=T)
+records <- read.csv("./outputs/03_clean_df_thin_5.csv", head=T)
+family <- read.csv("./outputs/03_n_thinned_records.csv", head=T)
 
 n_records <- records %>%
   group_by(species) %>%
